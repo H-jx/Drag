@@ -5,9 +5,9 @@
  * @param {Object} opts
  * opts = {
  *      container: Element 父级容器，如果有，则会限制活动范围
- *      dragTarget:{Element} [点击对象，点它才会拖拽,默认为el],
- *      position: {Array}   [x, y]
- *      events: {
+ *      dragTarget?: Element [点击对象，点它才会拖拽,默认为el],
+ *      position?: [Number, Number]   [x, y]
+ *      events?: {
  *          onDown: (Event) => {},
  *          onMove: (Event, Drag) => {},
  *          onUp: (Event) => {},
