@@ -1,4 +1,13 @@
 
+var supportsPassive = false;
+
+document.createElement("div").addEventListener("test", function() {}, {
+  get passive() {
+    supportsPassive = true;
+    return false;
+  }
+});
+
 /**
  * 拖拽, 兼容触摸
  * @param {Element}
@@ -6,7 +15,8 @@
  * opts = {
  *      container: Element 父级容器，如果有，则会限制活动范围
  *      dragTarget?: Element [点击对象，点它才会拖拽,默认为el],
- *      position?: [Number, Number]   [x, y]
+ *      position?: [Number, Number]   [x, y] 初始位置
+ *      //  return false可进行拦截原事件
  *      events?: {
  *          onDown: (Event) => {},
  *          onMove: (Event, Drag) => {},
@@ -16,7 +26,7 @@
  * @example
  * new Drag(element, {
  *  dragTarget: // element or el.childern
- *  position: [10, 10]
+ *  position: [10, 10] // 初始位置
  * })
  */
 class Drag {
@@ -50,7 +60,7 @@ class Drag {
      * 添加点下事件
      */
     onDown() {
-        this.dragTarget.addEventListener('mousedown', this.handleDown.bind(this), false);
+        this.dragTarget.addEventListener('mousedown', this.handleDown.bind(this), true);
         this.dragTarget.addEventListener('touchstart', this.handleDown.bind(this), false);
     }
     /**
@@ -58,7 +68,7 @@ class Drag {
      */
     onMove() {
         document.addEventListener('mousemove', this.handleMove, false);
-        document.addEventListener('touchmove', this.handleMove, false);
+        document.addEventListener('touchmove', this.handleMove, supportsPassive ? { passive: false, capture: false } : false);
     }
     /**
      * 点下时的处理
@@ -74,7 +84,7 @@ class Drag {
             this.diffY = this.useTransform ? (ev.clientY - this.y) : (ev.clientY - this.el.offsetTop);
         }
         if (this.events.onDown) {
-            if (this.events.onDown(ev) === false) {
+            if (this.events.onDown(ev, this) === false) {
                 return;
             }
         }
