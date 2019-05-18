@@ -1,5 +1,5 @@
 {
-  "name": "drag",
+  "name": "h-drag",
   "version": "1.0.0",
   "description": "drag.js",
   "main": "dist/drag.js",
@@ -7,17 +7,25 @@
     "type": "git",
     "url": "https://github.com/H-jx/Drag"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/jest": "^24.0.13"
+  },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
-    "webpack": "^4.16.4",
-    "webpack-cli": "^3.1.0"
+    "jest": "^24.8.0",
+    "rollup": "^1.12.2",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-node-resolve": "^5.0.0",
+    "rollup-plugin-typescript2": "^0.21.1",
+    "rollup-plugin-uglify": "^6.0.2",
+    "ts-jest": "^23.10.5",
+    "tslint": "^5.14.0",
+    "typescript": "^3.4.5"
   },
   "scripts": {
-    "build": "babel src -d dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:es": "tsc",
+    "build:min": "rollup -c --environment INCLUDE_DEPS,BUILD:production",
+    "test": "jest",
+    "prepublish": "npm run build:es & npm run build:min"
   },
   "author": "",
   "license": "ISC"
