@@ -10,14 +10,6 @@ export interface Optional {
     events?: Events;
 }
 /**
- * 解析Transform属性
- * @param transform
- */
-export declare const paserTransform: (transform: string) => {
-    translateX: number;
-    translateY: number;
-};
-/**
  * 拖拽, 兼容触摸
  * @param {HTMLElement}
  * @param {Object} opts
@@ -65,5 +57,4 @@ declare class Drag {
     handleMove(ev: TouchEvent | MouseEvent): void;
     handleUp(ev: TouchEvent | MouseEvent): void;
 }
-export { Drag };
 export default Drag;

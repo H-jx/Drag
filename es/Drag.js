@@ -11,7 +11,7 @@ var getStyle = function (ele) {
  * 解析Transform属性
  * @param transform
  */
-export var paserTransform = function (transform) {
+var paserTransform = function (transform) {
     var translateXRegExp = getRegExp('translateX');
     var translateYRegExp = getRegExp('translateY');
     var translateRegExp = /(translate)\([0-9]+\.?[0-9]*(px)\,\s?[0-9]+\.?[0-9]*(px)\)/;
@@ -203,5 +203,4 @@ var Drag = /** @class */ (function () {
     Drag.paserTransform = paserTransform;
     return Drag;
 }());
-export { Drag };
 export default Drag;
