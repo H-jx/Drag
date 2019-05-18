@@ -1,49 +1,31 @@
-
-export interface Events {
-    [eventName: string]: (ev: Event, drag: Drag) => boolean | void;
-}
-export interface Optional {
-    x?: number;
-    y?: number;
-    container?: HTMLElement; // 父级容器，如果有，则会限制活动范围
-    dragTarget?: HTMLElement; // 点击对象，点它才会拖拽,默认为el
-    useTransform?: boolean;
-    events?: Events;
-}
-
-const isFunc = function (fn: any) {
+var isFunc = function (fn) {
     return typeof fn === 'function';
 };
-const getRegExp = function (prop: string) {
-    return new RegExp(`(${prop})\\([0-9]+\.?[0-9]*(px)\\)`);
+var getRegExp = function (prop) {
+    return new RegExp("(" + prop + ")\\([0-9]+.?[0-9]*(px)\\)");
 };
-const getStyle = function(ele: HTMLElement) {
+var getStyle = function (ele) {
     return getComputedStyle(ele, null);
 };
 /**
  * 解析Transform属性
  * @param transform
  */
-const paserTransform = function (transform: string) {
-    const translateXRegExp = getRegExp('translateX');
-    const translateYRegExp = getRegExp('translateY');
-    const translateRegExp = /(translate)\([0-9]+\.?[0-9]*(px)\,\s?[0-9]+\.?[0-9]*(px)\)/;
-
-    let props = {
+export var paserTransform = function (transform) {
+    var translateXRegExp = getRegExp('translateX');
+    var translateYRegExp = getRegExp('translateY');
+    var translateRegExp = /(translate)\([0-9]+\.?[0-9]*(px)\,\s?[0-9]+\.?[0-9]*(px)\)/;
+    var props = {
         translateX: 0,
-        translateY: 0,
-    } as {
-        translateX: number;
-        translateY: number;
-        // translate?: number;
+        translateY: 0
     };
-    const paserProp = function (regExp: RegExp, str: string) {
-        let resArr = regExp.exec(str);
+    var paserProp = function (regExp, str) {
+        var resArr = regExp.exec(str);
         if (resArr === null) {
             return '';
         }
-        let resStr = resArr[0];
-        let value = resStr.substring(resStr.indexOf('(') + 1, resStr.indexOf(')'));
+        var resStr = resArr[0];
+        var value = resStr.substring(resStr.indexOf('(') + 1, resStr.indexOf(')'));
         return value;
     };
     if (translateXRegExp.test(transform)) {
@@ -53,7 +35,7 @@ const paserTransform = function (transform: string) {
         props.translateY = parseFloat(paserProp(translateYRegExp, transform));
     }
     if (translateRegExp.test(transform)) {
-        let res = paserProp(translateRegExp, transform).split(',');
+        var res = paserProp(translateRegExp, transform).split(',');
         props.translateX = parseFloat(res[0]);
         props.translateY = parseFloat(res[1]);
     }
@@ -68,17 +50,11 @@ const paserTransform = function (transform: string) {
  *  dragTarget: // element or el.childern
  * })
  */
-class Drag {
-    static paserTransform = paserTransform;
-    x: number = 0; // 位移
-    y: number = 0; // 位移
-    disX: number; // onTouchStart与offsetX的差
-    disY: number; // onTouchStart与offsetY的差
-    opts: Optional;
-    events: Events = {};
-    el!: HTMLElement;
-    dragTarget!:  HTMLElement;
-    constructor(el: HTMLElement, opts: Optional) {
+var Drag = /** @class */ (function () {
+    function Drag(el, opts) {
+        this.x = 0; // 位移
+        this.y = 0; // 位移
+        this.events = {};
         // 位移差
         this.disX = 0;
         this.disY = 0;
@@ -86,15 +62,15 @@ class Drag {
         this.opts = opts || {};
         this.init(el);
     }
-    destroy() {
+    Drag.prototype.destroy = function () {
         this.dragTarget.removeEventListener('mousedown', this.handleDown);
         this.dragTarget.removeEventListener('touchstart', this.handleDown);
-    }
+    };
     /**
      * 初始化
      * @param {HTMLElement}
      */
-    init(el: HTMLElement) {
+    Drag.prototype.init = function (el) {
         if (!(el instanceof HTMLElement)) {
             throw Error('未传el[must be a HTMLHTMLElement]');
         }
@@ -111,45 +87,46 @@ class Drag {
         if (!this.opts.useTransform && getStyle(this.el).position !== 'absolute') {
             this.el.style.position = 'absolute';
         }
-    }
+    };
     /**
      * 添加点下事件
      */
-    bindTouchStartEvents() {
+    Drag.prototype.bindTouchStartEvents = function () {
         this.dragTarget.addEventListener('mousedown', this.handleDown, false);
         this.dragTarget.addEventListener('touchstart', this.handleDown, false);
-    }
+    };
     /**
      * 添加移动事件
      */
-    bindMoveEvents() {
+    Drag.prototype.bindMoveEvents = function () {
         document.addEventListener('mousemove', this.handleMove, false);
         document.addEventListener('touchmove', this.handleMove, false);
-    }
+    };
     /**
      * 点下时的处理
      * @param {Event} ev
      */
-    handleDown(ev: TouchEvent | MouseEvent) {
-        let clientX = 0;
-        let clientY = 0;
+    Drag.prototype.handleDown = function (ev) {
+        var clientX = 0;
+        var clientY = 0;
         if (ev.type === 'touchstart') {
-            const touche = (ev as TouchEvent).touches[0];
+            var touche = ev.touches[0];
             clientX = touche.clientX;
             clientY = touche.clientY;
-        } else {
-            clientX = (ev as MouseEvent).clientX;
-            clientY = (ev as MouseEvent).clientY;
+        }
+        else {
+            clientX = ev.clientX;
+            clientY = ev.clientY;
         }
         if (this.opts.useTransform) {
-            let translate = paserTransform(this.el.style.transform || '');
+            var translate = paserTransform(this.el.style.transform || '');
             this.disX = clientX - translate.translateX;
             this.disY = clientY - translate.translateY;
-        } else {
+        }
+        else {
             this.disX = clientX - this.el.offsetLeft;
             this.disY = clientY - this.el.offsetTop;
         }
-
         if (isFunc(this.events.onDown)) {
             if (this.events.onDown(ev, this) === false) {
                 return;
@@ -158,27 +135,28 @@ class Drag {
         this.bindMoveEvents();
         document.addEventListener('mouseup', this.handleUp);
         document.addEventListener('touchend', this.handleUp);
-    }
+    };
     /**
      * 移动时
      */
-    handleMove(ev: TouchEvent | MouseEvent) {
-        const self = this;
+    Drag.prototype.handleMove = function (ev) {
+        var self = this;
         if (ev.type === 'touchmove') {
             ev.preventDefault();
-            const touche = (ev as TouchEvent).touches[0];
+            var touche = ev.touches[0];
             self.x = touche.clientX - self.disX;
             self.y = touche.clientY - self.disY;
-        } else {
-            self.x = (ev as MouseEvent).clientX - self.disX;
-            self.y = (ev as MouseEvent).clientY - self.disY;
+        }
+        else {
+            self.x = ev.clientX - self.disX;
+            self.y = ev.clientY - self.disY;
         }
         // 限制范围
         if (this.opts.container instanceof HTMLElement) {
-            const rect = this.opts.container.getBoundingClientRect() as DOMRect;
-            const width = this.el.clientWidth;
-            const height = this.el.clientHeight;
-            const { x, y } = this.el.getBoundingClientRect() as DOMRect;
+            var rect = this.opts.container.getBoundingClientRect();
+            var width = this.el.clientWidth;
+            var height = this.el.clientHeight;
+            var _a = this.el.getBoundingClientRect(), x = _a.x, y = _a.y;
             // 左
             if (x < rect.left) {
                 self.x = rect.left;
@@ -202,17 +180,16 @@ class Drag {
                 return;
             }
         }
-
         if (this.opts.useTransform) {
-            self.el.style.transform = `translate(${self.x}px,${self.y}px)`;
-        } else {
-            self.el.style.left = `${self.x}px`;
-            self.el.style.top = `${self.y}px`;
+            self.el.style.transform = "translate(" + self.x + "px," + self.y + "px)";
+        }
+        else {
+            self.el.style.left = self.x + "px";
+            self.el.style.top = self.y + "px";
         }
         ev.preventDefault();
-    }
-
-    handleUp(ev: TouchEvent | MouseEvent) {
+    };
+    Drag.prototype.handleUp = function (ev) {
         if (isFunc(this.events.onUp)) {
             if (this.events.onUp(ev, this) === false) {
                 return;
@@ -222,8 +199,9 @@ class Drag {
         document.removeEventListener('touchmove', this.handleMove);
         document.removeEventListener('mouseup', this.handleUp);
         document.removeEventListener('touchend', this.handleUp);
-    }
-}
-
-
+    };
+    Drag.paserTransform = paserTransform;
+    return Drag;
+}());
+export { Drag };
 export default Drag;
